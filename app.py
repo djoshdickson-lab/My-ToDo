@@ -1,4 +1,4 @@
-from flask import Flask, render_template_string
+from flask import Flask, render_template_string, url_for  # Added url_for here
 
 app = Flask(__name__)
 
@@ -8,27 +8,18 @@ HTML_TEMPLATE = """
 <head>
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0">
     <title>My Tasks</title>
+    
+    <link rel="icon" type="image/png" href="{{ url_for('static', filename='icon.png') }}">
+    <link rel="apple-touch-icon" href="{{ url_for('static', filename='icon.png') }}">
+    
     <style>
-        body { font-family: -apple-system, sans-serif; padding: 20px; background: #f0f2f5; }
-        .container { max-width: 500px; margin: auto; }
-        
-        .input-group { display: flex; gap: 10px; margin-bottom: 20px; }
-        input { flex: 1; padding: 15px; border-radius: 12px; border: 1px solid #ddd; font-size: 16px; }
-        button#add-btn { padding: 15px 20px; border-radius: 12px; background: #007bff; color: white; border: none; font-weight: bold; }
-        
-        .todo-item { 
-            background: white; padding: 18px; margin-bottom: 10px; 
-            border-radius: 12px; box-shadow: 0 2px 4px rgba(0,0,0,0.05);
-            display: flex; justify-content: space-between; align-items: center;
-            transition: all 0.2s; touch-action: manipulation;
-            position: relative; overflow: hidden;
-        }
-        .completed { text-decoration: line-through; color: #aaa; background: #f9f9f9; }
-        
-        /* Visual cue for holding */
-        .todo-item:active { background: #ffebeb; transform: scale(0.98); }
+        /* Your existing CSS here... */
     </style>
 </head>
+...
+"""
+
+
 <body>
     <div class="container">
         <h1>My Tasks</h1>
