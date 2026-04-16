@@ -11,7 +11,6 @@ HTML_TEMPLATE = """
     <style>
         body { font-family: -apple-system, sans-serif; padding: 20px; background: #f0f2f5; }
         .container { max-width: 500px; margin: auto; }
-        h1 { text-align: center; color: #1a1a1a; }
         
         .input-group { display: flex; gap: 10px; margin-bottom: 20px; }
         input { flex: 1; padding: 15px; border-radius: 12px; border: 1px solid #ddd; font-size: 16px; }
@@ -21,9 +20,13 @@ HTML_TEMPLATE = """
             background: white; padding: 18px; margin-bottom: 10px; 
             border-radius: 12px; box-shadow: 0 2px 4px rgba(0,0,0,0.05);
             display: flex; justify-content: space-between; align-items: center;
-            transition: transform 0.1s; touch-action: manipulation;
+            transition: all 0.2s; touch-action: manipulation;
+            position: relative; overflow: hidden;
         }
         .completed { text-decoration: line-through; color: #aaa; background: #f9f9f9; }
+        
+        /* Visual cue for holding */
+        .todo-item:active { background: #ffebeb; transform: scale(0.98); }
     </style>
 </head>
 <body>
@@ -41,7 +44,6 @@ HTML_TEMPLATE = """
         const btn = document.getElementById('add-btn');
         const list = document.getElementById('todo-list');
 
-        // 1. Load data from phone storage on startup
         let todos = JSON.parse(localStorage.getItem('my_tasks')) || [];
 
         function render() {
@@ -51,22 +53,29 @@ HTML_TEMPLATE = """
                 div.className = `todo-item ${todo.done ? 'completed' : ''}`;
                 div.innerText = todo.text;
                 
-                // Single Tap to Strike out
+                let holdTimer;
+
+                // 1. START HOLD (3 seconds)
+                div.addEventListener('touchstart', (e) => {
+                    holdTimer = setTimeout(() => {
+                        // Success! Held for 3s
+                        if(confirm('Delete this task?')) {
+                            todos.splice(index, 1);
+                            save();
+                        }
+                    }, 3000); // 3000ms = 3 seconds
+                });
+
+                // 2. CANCEL HOLD (If finger is lifted early)
+                div.addEventListener('touchend', () => {
+                    clearTimeout(holdTimer);
+                });
+
+                // 3. SINGLE CLICK (Toggle Strikeout)
                 div.onclick = () => {
                     todos[index].done = !todos[index].done;
                     save();
                 };
-
-                // Double Tap to Delete
-                let lastTap = 0;
-                div.addEventListener('touchend', (e) => {
-                    let now = new Date().getTime();
-                    if (now - lastTap < 300) {
-                        todos.splice(index, 1);
-                        save();
-                    }
-                    lastTap = now;
-                });
 
                 list.appendChild(div);
             });
@@ -85,7 +94,7 @@ HTML_TEMPLATE = """
             }
         };
 
-        render(); // Initial draw
+        render();
     </script>
 </body>
 </html>
