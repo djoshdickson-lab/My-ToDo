@@ -3,7 +3,6 @@ import os
 
 app = Flask(__name__)
 
-# We use triple quotes to wrap the entire HTML block
 HTML_TEMPLATE = """
 <!DOCTYPE html>
 <html>
@@ -26,12 +25,15 @@ HTML_TEMPLATE = """
         .todo-item { 
             background: white; padding: 18px; margin-bottom: 10px; 
             border-radius: 12px; box-shadow: 0 2px 4px rgba(0,0,0,0.05);
-            transition: all 0.2s; touch-action: manipulation;
-            user-select: none; -webkit-user-select: none;
+            transition: all 0.2s; 
+            
+            /* THIS IS THE FIX: Prevents the phone's copy/paste menu from appearing */
+            -webkit-touch-callout: none; 
+            -webkit-user-select: none;   
+            user-select: none;           
+            touch-action: none;          
         }
         .completed { text-decoration: line-through; color: #aaa; background: #f9f9f9; }
-        
-        /* Visual cue when pressing */
         .todo-item:active { background: #ffebeb; transform: scale(0.96); }
     </style>
 </head>
@@ -50,7 +52,6 @@ HTML_TEMPLATE = """
         const btn = document.getElementById('add-btn');
         const list = document.getElementById('todo-list');
 
-        // Load data from phone storage
         let todos = JSON.parse(localStorage.getItem('my_tasks')) || [];
 
         function render() {
@@ -61,18 +62,23 @@ HTML_TEMPLATE = """
                 div.innerText = todo.text;
                 
                 let holdTimer;
+                let isHolding = false;
 
-                // Long Press to Delete (3 seconds)
-                div.addEventListener('touchstart', () => {
+                // Handle Hold to Delete
+                div.addEventListener('touchstart', (e) => {
+                    isHolding = true;
                     holdTimer = setTimeout(() => {
-                        if(confirm('Delete this task?')) {
-                            todos.splice(index, 1);
-                            save();
+                        if(isHolding) {
+                            if(confirm('Delete this task?')) {
+                                todos.splice(index, 1);
+                                save();
+                            }
                         }
-                    }, 3000); 
+                    }, 1500); // Shortened to 1.5s for a better feel
                 });
 
                 div.addEventListener('touchend', () => {
+                    isHolding = false;
                     clearTimeout(holdTimer);
                 });
 
